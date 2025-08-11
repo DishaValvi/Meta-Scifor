@@ -77,83 +77,100 @@ rf_pipeline.fit(X_train, y_train)
 xgb_pipeline.fit(X_train, y_train)
 app = Flask(__name__)
 html_form = """
-<h2>Loan Approval Prediction</h2>
-<form action="/predict" method="post">
+<div style="max-width: 500px; margin: 40px auto; padding: 25px; border: 1px solid #ccc; 
+            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            font-family: Arial, sans-serif; background-color: #fff;">
+    <h2 style="text-align: center; color: #2c3e50;">🏦 Loan Approval Prediction</h2>
+    <form action="/predict" method="post" style="display: flex; flex-direction: column; gap: 12px;">
 
-    <!-- Gender -->
-    <label>Gender:</label><br>
-    <input type="radio" name="Gender" value="Male" required> Male
-    <input type="radio" name="Gender" value="Female"> Female
-    <br><br>
+        <label style="font-weight: bold;">Gender:</label>
+        <div>
+            <label><input type="radio" name="Gender" value="Male" required> Male</label>
+            <label style="margin-left: 10px;"><input type="radio" name="Gender" value="Female"> Female</label>
+        </div>
 
-    <!-- Married -->
-    <label>Married:</label><br>
-    <input type="radio" name="Married" value="Yes" required> Yes
-    <input type="radio" name="Married" value="No"> No
-    <br><br>
+        <label style="font-weight: bold;">Married:</label>
+        <div>
+            <label><input type="radio" name="Married" value="Yes" required> Yes</label>
+            <label style="margin-left: 10px;"><input type="radio" name="Married" value="No"> No</label>
+        </div>
 
-    <!-- Dependents -->
-    <label>Dependents:</label>
-    <select name="Dependents" required>
-        <option value="0">0</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3+">3+</option>
-    </select>
-    <br><br>
+        <label style="font-weight: bold;">Dependents:</label>
+        <select name="Dependents" required style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3+">3+</option>
+        </select>
 
-    <!-- Education -->
-    <label>Education:</label><br>
-    <input type="radio" name="Education" value="Graduate" required> Graduate
-    <input type="radio" name="Education" value="Not Graduate"> Not Graduate
-    <br><br>
+        <label style="font-weight: bold;">Education:</label>
+        <div>
+            <label><input type="radio" name="Education" value="Graduate" required> Graduate</label>
+            <label style="margin-left: 10px;"><input type="radio" name="Education" value="Not Graduate"> Not Graduate</label>
+        </div>
 
-    <!-- Self Employed -->
-    <label>Self Employed:</label><br>
-    <input type="radio" name="Self_Employed" value="Yes" required> Yes
-    <input type="radio" name="Self_Employed" value="No"> No
-    <br><br>
+        <label style="font-weight: bold;">Self Employed:</label>
+        <div>
+            <label><input type="radio" name="Self_Employed" value="Yes" required> Yes</label>
+            <label style="margin-left: 10px;"><input type="radio" name="Self_Employed" value="No"> No</label>
+        </div>
 
-    <!-- Applicant Income -->
-    <label>Applicant Income:</label>
-    <input type="number" name="ApplicantIncome" min="0" required>
-    <br><br>
+        <label style="font-weight: bold;">Applicant Income:</label>
+        <input type="number" name="ApplicantIncome" min="0" required 
+               style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
 
-    <!-- Coapplicant Income -->
-    <label>Coapplicant Income:</label>
-    <input type="number" name="CoapplicantIncome" min="0" required>
-    <br><br>
+        <label style="font-weight: bold;">Coapplicant Income:</label>
+        <input type="number" name="CoapplicantIncome" min="0" required 
+               style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
 
-    <!-- Loan Amount -->
-    <label>Loan Amount:</label>
-    <input type="number" name="LoanAmount" min="0" required>
-    <br><br>
+        <label style="font-weight: bold;">Loan Amount:</label>
+        <input type="number" name="LoanAmount" min="0" required 
+               style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
 
-    <!-- Loan Amount Term -->
-    <label>Loan Amount Term (days):</label>
-    <input type="number" name="Loan_Amount_Term" min="0" required>
-    <br><br>
+        <label style="font-weight: bold;">Loan Amount Term (days):</label>
+        <input type="number" name="Loan_Amount_Term" min="0" required 
+               style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
 
-    <!-- Credit History -->
-    <label>Credit History:</label>
-    <select name="Credit_History" required>
-        <option value="1.0">Good (1)</option>
-        <option value="0.0">Bad (0)</option>
-    </select>
-    <br><br>
+        <label style="font-weight: bold;">Credit History:</label>
+        <select name="Credit_History" required style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+            <option value="1.0">Good (1)</option>
+            <option value="0.0">Bad (0)</option>
+        </select>
 
-    <!-- Property Area -->
-    <label>Property Area:</label>
-    <select name="Property_Area" required>
-        <option value="Urban">Urban</option>
-        <option value="Semiurban">Semiurban</option>
-        <option value="Rural">Rural</option>
-    </select>
-    <br><br>
+        <label style="font-weight: bold;">Property Area:</label>
+        <select name="Property_Area" required style="padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+            <option value="Urban">Urban</option>
+            <option value="Semiurban">Semiurban</option>
+            <option value="Rural">Rural</option>
+        </select>
 
-    <input type="submit" value="Check Approval">
-</form>
+        <input type="submit" value="Check Approval" 
+               style="margin-top: 15px; padding: 10px; background: linear-gradient(90deg, #3498db, #2ecc71); 
+                      border: none; border-radius: 8px; color: white; font-size: 16px; cursor: pointer; 
+                      transition: all 0.3s ease;">
+    </form>
+</div>
+
+<script>
+    // Add hover and focus effects dynamically
+    document.querySelectorAll("input, select").forEach(el => {
+        el.addEventListener("focus", () => {
+            el.style.border = "1px solid #3498db";
+            el.style.boxShadow = "0 0 6px rgba(52, 152, 219, 0.5)";
+        });
+        el.addEventListener("blur", () => {
+            el.style.border = "1px solid #ccc";
+            el.style.boxShadow = "none";
+        });
+    });
+
+    // Button hover effect
+    const btn = document.querySelector("input[type='submit']");
+    btn.addEventListener("mouseover", () => btn.style.opacity = "0.85");
+    btn.addEventListener("mouseout", () => btn.style.opacity = "1");
+</script>
 """
+
 @app.route('/')
 def home():
     return render_template_string(html_form)
