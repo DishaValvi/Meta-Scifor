@@ -73,7 +73,8 @@ def evaluate_model(pipeline, X_train, y_train, X_test, y_test):
         'roc_auc': roc_auc_score(y_test, y_proba) if y_proba is not None else None,
         'classification_report': classification_report(y_test, y_pred, output_dict=True)
     }
-
+rf_pipeline.fit(X_train, y_train)
+xgb_pipeline.fit(X_train, y_train)
 app = Flask(__name__)
 html_form = """
 <h2>Loan Approval Prediction</h2>
