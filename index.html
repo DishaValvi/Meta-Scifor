@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loan Prediction Model API</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mt-5">Loan Prediction Model</h1>
+        <p class="lead">Click below to train and view model results.</p>
+
+        <button id="trainBtn" class="btn btn-primary btn-lg">Train Models</button>
+
+        <div class="progress mt-4" style="height: 30px; display: none;" id="progressContainer">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                 role="progressbar" style="width: 0%" id="progressBar">0%</div>
+        </div>
+
+        <div id="results" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById("trainBtn").addEventListener("click", function() {
+            let progressBar = document.getElementById("progressBar");
+            let progressContainer = document.getElementById("progressContainer");
+            let resultsDiv = document.getElementById("results");
+
+            resultsDiv.innerHTML = "";
+            progressContainer.style.display = "block";
+            progressBar.style.width = "0%";
+            progressBar.innerText = "0%";
+
+            let progress = 0;
+            let interval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    progressBar.style.width = progress + "%";
+                    progressBar.innerText = progress + "%";
+                }
+            }, 300);
+
+            fetch("/train")
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(interval);
+                    progressBar.style.width = "100%";
+                    progressBar.innerText = "100%";
+
+                    setTimeout(() => {
+                        progressContainer.style.display = "none";
+                        for (let model in data) {
+                            resultsDiv.innerHTML += `
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${model}</h5>
+                                        <pre>${JSON.stringify(data[model], null, 2)}</pre>
+                                    </div>
+                                </div>
