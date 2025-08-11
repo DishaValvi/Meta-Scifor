@@ -3,7 +3,6 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from flask import Flask, jsonify, request, render_template
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -12,7 +11,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
-
 try:
     from xgboost import XGBClassifier
 except ImportError:
@@ -20,7 +18,7 @@ except ImportError:
 
 RANDOM_STATE = 42
 
-# Load data
+# Load dataset
 data_path_xlsx = 'loan_prediction.csv.xlsx'
 if os.path.exists(data_path_xlsx):
     df = pd.read_excel(data_path_xlsx)
@@ -76,7 +74,6 @@ def evaluate_model(pipeline, X_train, y_train, X_test, y_test):
         'classification_report': classification_report(y_test, y_pred, output_dict=True)
     }
 
-# Train models
 rf_pipeline.fit(X_train, y_train)
 xgb_pipeline.fit(X_train, y_train)
 
@@ -84,7 +81,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template("form.html")
+    return render_template("index.html")
 
 @app.route('/train')
 def train():
@@ -97,27 +94,17 @@ def train():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    input_data = pd.DataFrame([{
-        "Gender": request.form["Gender"],
-        "Married": request.form["Married"],
-        "Dependents": request.form["Dependents"],
-        "Education": request.form["Education"],
-        "Self_Employed": request.form["Self_Employed"],
-        "ApplicantIncome": float(request.form["ApplicantIncome"]),
-        "CoapplicantIncome": float(request.form["CoapplicantIncome"]),
-        "LoanAmount": float(request.form["LoanAmount"]),
-        "Loan_Amount_Term": float(request.form["Loan_Amount_Term"]),
-        "Credit_History": float(request.form["Credit_History"]),
-        "Property_Area": request.form["Property_Area"]
-    }])
-
+    input_data = pd.DataFrame([request.json])
     for col in input_data.select_dtypes(include=['object']).columns:
         input_data[col] = input_data[col].astype(str)
 
     prediction = rf_pipeline.predict(input_data)[0]
-    result = "✅ Loan Approved" if prediction == 1 else "❌ Loan Rejected"
-
-    return render_template("result.html", result=result)
+    proba = rf_pipeline.predict_proba(input_data)[0][1]
+    result = {
+        "prediction": "✅ Loan Approved" if prediction == 1 else "❌ Loan Rejected",
+        "probability": round(float(proba) * 100, 2)
+    }
+    return jsonify(result)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
