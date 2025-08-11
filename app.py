@@ -93,7 +93,24 @@ def train():
     if XGBClassifier is not None:
         results['XGBoost'] = evaluate_model(xgb_pipeline, X_train, y_train, X_test, y_test)
     return jsonify(results)
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    try:
+        new_data = pd.read_csv(file)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read file: {e}'}), 400
 
+    # Ensure same preprocessing as training
+    for col in new_data.select_dtypes(include=['object']).columns:
+        new_data[col] = new_data[col].astype(str)
+
+    # Predict using trained RF model
+    rf_pipeline.fit(X_train, y_train)
+    predictions = rf_pipeline.predict(new_data)
+    return jsonify({'predictions': predictions.tolist()})
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
