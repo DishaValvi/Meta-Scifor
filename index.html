@@ -1,67 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Loan Prediction Model API</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Loan Approval Prediction</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container text-center">
-        <h1 class="mt-5">Loan Prediction Model</h1>
-        <p class="lead">Click below to train and view model results.</p>
+<div class="container">
+    <h2>🏦 Loan Approval Prediction</h2>
+    <form id="loanForm">
+        <label>Gender:</label>
+        <select name="Gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
 
-        <button id="trainBtn" class="btn btn-primary btn-lg">Train Models</button>
+        <label>Married:</label>
+        <select name="Married" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
 
-        <div class="progress mt-4" style="height: 30px; display: none;" id="progressContainer">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                 role="progressbar" style="width: 0%" id="progressBar">0%</div>
-        </div>
+        <label>Dependents:</label>
+        <select name="Dependents" required>
+            <option value="0">0</option><option value="1">1</option>
+            <option value="2">2</option><option value="3+">3+</option>
+        </select>
 
-        <div id="results" class="mt-4"></div>
-    </div>
+        <label>Education:</label>
+        <select name="Education" required>
+            <option value="Graduate">Graduate</option>
+            <option value="Not Graduate">Not Graduate</option>
+        </select>
 
-    <script>
-        document.getElementById("trainBtn").addEventListener("click", function() {
-            let progressBar = document.getElementById("progressBar");
-            let progressContainer = document.getElementById("progressContainer");
-            let resultsDiv = document.getElementById("results");
+        <label>Self Employed:</label>
+        <select name="Self_Employed" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
 
-            resultsDiv.innerHTML = "";
-            progressContainer.style.display = "block";
-            progressBar.style.width = "0%";
-            progressBar.innerText = "0%";
+        <label>Applicant Income:</label>
+        <input type="number" name="ApplicantIncome" min="0" required>
 
-            let progress = 0;
-            let interval = setInterval(() => {
-                if (progress < 90) {
-                    progress += 10;
-                    progressBar.style.width = progress + "%";
-                    progressBar.innerText = progress + "%";
-                }
-            }, 300);
+        <label>Coapplicant Income:</label>
+        <input type="number" name="CoapplicantIncome" min="0" required>
 
-            fetch("/train")
-                .then(response => response.json())
-                .then(data => {
-                    clearInterval(interval);
-                    progressBar.style.width = "100%";
-                    progressBar.innerText = "100%";
+        <label>Loan Amount:</label>
+        <input type="number" name="LoanAmount" min="0" required>
 
-                    setTimeout(() => {
-                        progressContainer.style.display = "none";
-                        for (let model in data) {
-                            resultsDiv.innerHTML += `
-                                <div class="card mt-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${model}</h5>
-                                        <pre>${JSON.stringify(data[model], null, 2)}</pre>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }, 500);
-                });
-        });
-    </script>
+        <label>Loan Amount Term (days):</label>
+        <input type="number" name="Loan_Amount_Term" min="0" required>
+
+        <label>Credit History:</label>
+        <select name="Credit_History" required>
+            <option value="1.0">Good (1)</option>
+            <option value="0.0">Bad (0)</option>
+        </select>
+
+        <label>Property Area:</label>
+        <select name="Property_Area" required>
+            <option value="Urban">Urban</option>
+            <option value="Semiurban">Semiurban</option>
+            <option value="Rural">Rural</option>
+        </select>
+
+        <button type="submit">Check Approval</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+document.getElementById("loanForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    let formData = {};
+    new FormData(this).forEach((value, key) => formData[key] = value);
+
+    fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("result").innerHTML = `
+            <div class="result-card">
+                <h3>${data.prediction}</h3>
+                <p>Confidence: ${data.probability}%</p>
+            </div>
+        `;
+    });
+});
+</script>
 </body>
 </html>
