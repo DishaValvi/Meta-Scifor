@@ -75,7 +75,84 @@ def evaluate_model(pipeline, X_train, y_train, X_test, y_test):
     }
 
 app = Flask(__name__)
+html_form = """
+<h2>Loan Approval Prediction</h2>
+<form action="/predict" method="post">
 
+    <!-- Gender -->
+    <label>Gender:</label><br>
+    <input type="radio" name="Gender" value="Male" required> Male
+    <input type="radio" name="Gender" value="Female"> Female
+    <br><br>
+
+    <!-- Married -->
+    <label>Married:</label><br>
+    <input type="radio" name="Married" value="Yes" required> Yes
+    <input type="radio" name="Married" value="No"> No
+    <br><br>
+
+    <!-- Dependents -->
+    <label>Dependents:</label>
+    <select name="Dependents" required>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3+">3+</option>
+    </select>
+    <br><br>
+
+    <!-- Education -->
+    <label>Education:</label><br>
+    <input type="radio" name="Education" value="Graduate" required> Graduate
+    <input type="radio" name="Education" value="Not Graduate"> Not Graduate
+    <br><br>
+
+    <!-- Self Employed -->
+    <label>Self Employed:</label><br>
+    <input type="radio" name="Self_Employed" value="Yes" required> Yes
+    <input type="radio" name="Self_Employed" value="No"> No
+    <br><br>
+
+    <!-- Applicant Income -->
+    <label>Applicant Income:</label>
+    <input type="number" name="ApplicantIncome" min="0" required>
+    <br><br>
+
+    <!-- Coapplicant Income -->
+    <label>Coapplicant Income:</label>
+    <input type="number" name="CoapplicantIncome" min="0" required>
+    <br><br>
+
+    <!-- Loan Amount -->
+    <label>Loan Amount:</label>
+    <input type="number" name="LoanAmount" min="0" required>
+    <br><br>
+
+    <!-- Loan Amount Term -->
+    <label>Loan Amount Term (days):</label>
+    <input type="number" name="Loan_Amount_Term" min="0" required>
+    <br><br>
+
+    <!-- Credit History -->
+    <label>Credit History:</label>
+    <select name="Credit_History" required>
+        <option value="1.0">Good (1)</option>
+        <option value="0.0">Bad (0)</option>
+    </select>
+    <br><br>
+
+    <!-- Property Area -->
+    <label>Property Area:</label>
+    <select name="Property_Area" required>
+        <option value="Urban">Urban</option>
+        <option value="Semiurban">Semiurban</option>
+        <option value="Rural">Rural</option>
+    </select>
+    <br><br>
+
+    <input type="submit" value="Check Approval">
+</form>
+"""
 @app.route('/')
 def home():
     html = """
@@ -102,20 +179,29 @@ def train():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-    file = request.files['file']
-    try:
-        new_data = pd.read_csv(file)
-    except Exception as e:
-        return jsonify({'error': f'Failed to read file: {e}'}), 400
+    input_data = pd.DataFrame([{
+        "Gender": request.form["Gender"],
+        "Married": request.form["Married"],
+        "Dependents": request.form["Dependents"],
+        "Education": request.form["Education"],
+        "Self_Employed": request.form["Self_Employed"],
+        "ApplicantIncome": float(request.form["ApplicantIncome"]),
+        "CoapplicantIncome": float(request.form["CoapplicantIncome"]),
+        "LoanAmount": float(request.form["LoanAmount"]),
+        "Loan_Amount_Term": float(request.form["Loan_Amount_Term"]),
+        "Credit_History": float(request.form["Credit_History"]),
+        "Property_Area": request.form["Property_Area"]
+    }])
 
-    for col in new_data.select_dtypes(include=['object']).columns:
-        new_data[col] = new_data[col].astype(str)
+    # Ensure string columns stay as strings
+    for col in input_data.select_dtypes(include=['object']).columns:
+        input_data[col] = input_data[col].astype(str)
 
-    rf_pipeline.fit(X_train, y_train)
-    predictions = rf_pipeline.predict(new_data)
-    return jsonify({'predictions': predictions.tolist()})
+    # Predict using the real model
+    prediction = rf_pipeline.predict(input_data)[0]
+    result = "✅ Loan Approved" if prediction == 1 else "❌ Loan Rejected"
+
+    return f"<h2>{result}</h2>"
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
