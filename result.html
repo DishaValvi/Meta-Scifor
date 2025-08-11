@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loan Result</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #FFDEE9, #B5FFFC);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px;
+        }
+        .result-box {
+            display: inline-block;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        a:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-box">
+        <h2>{{ result }}</h2>
+        <a href="/">🔙 Go Back</a>
+    </div>
+</body>
+</html>
