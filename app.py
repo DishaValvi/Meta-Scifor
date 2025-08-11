@@ -155,18 +155,7 @@ html_form = """
 """
 @app.route('/')
 def home():
-    html = """
-    <h1>Loan Prediction Model API</h1>
-    <p>Welcome! Choose an action below:</p>
-    <form action="/train">
-        <button type="submit">Train Model</button>
-    </form>
-    <form action="/predict" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
-        <button type="submit">Predict</button>
-    </form>
-    """
-    return render_template_string(html)
+    return render_template_string(html_form)
 
 @app.route('/train')
 def train():
