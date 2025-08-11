@@ -2,15 +2,15 @@ import os
 import warnings
 warnings.filterwarnings('ignore')
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, render_template_string
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 try:
     from xgboost import XGBClassifier
@@ -19,21 +19,17 @@ except ImportError:
 
 RANDOM_STATE = 42
 
-# Load data
 data_path_xlsx = 'loan_prediction.csv.xlsx'
 if os.path.exists(data_path_xlsx):
     df = pd.read_excel(data_path_xlsx)
 
-# Drop ID and map target
 if 'Loan_ID' in df.columns:
     df = df.drop(columns=['Loan_ID'])
 if 'Loan_Status' in df.columns:
     df['Loan_Status'] = df['Loan_Status'].map({'Y': 1, 'N': 0})
 
-# Drop rows where target is NaN
 df = df.dropna(subset=['Loan_Status'])
 
-# Ensure all categorical columns are strings
 for col in df.select_dtypes(include=['object']).columns:
     df[col] = df[col].astype(str)
 
@@ -78,12 +74,22 @@ def evaluate_model(pipeline, X_train, y_train, X_test, y_test):
         'classification_report': classification_report(y_test, y_pred, output_dict=True)
     }
 
-# Flask app setup
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Loan Prediction Model API is running."
+    html = """
+    <h1>Loan Prediction Model API</h1>
+    <p>Welcome! Choose an action below:</p>
+    <form action="/train">
+        <button type="submit">Train Model</button>
+    </form>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">Predict</button>
+    </form>
+    """
+    return render_template_string(html)
 
 @app.route('/train')
 def train():
@@ -93,6 +99,7 @@ def train():
     if XGBClassifier is not None:
         results['XGBoost'] = evaluate_model(xgb_pipeline, X_train, y_train, X_test, y_test)
     return jsonify(results)
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
@@ -103,14 +110,13 @@ def predict():
     except Exception as e:
         return jsonify({'error': f'Failed to read file: {e}'}), 400
 
-    # Ensure same preprocessing as training
     for col in new_data.select_dtypes(include=['object']).columns:
         new_data[col] = new_data[col].astype(str)
 
-    # Predict using trained RF model
     rf_pipeline.fit(X_train, y_train)
     predictions = rf_pipeline.predict(new_data)
     return jsonify({'predictions': predictions.tolist()})
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
