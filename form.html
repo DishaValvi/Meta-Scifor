@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loan Approval Prediction</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 5px;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 6px rgba(52,152,219,0.5);
+        }
+        .btn {
+            margin-top: 15px;
+            padding: 10px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🏦 Loan Approval Prediction</h2>
+    <form action="/predict" method="post">
+
+        <label>Gender:</label>
+        <select name="Gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <label>Married:</label>
+        <select name="Married" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+
+        <label>Dependents:</label>
+        <select name="Dependents" required>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3+">3+</option>
+        </select>
+
+        <label>Education:</label>
+        <select name="Education" required>
+            <option value="Graduate">Graduate</option>
+            <option value="Not Graduate">Not Graduate</option>
+        </select>
+
+        <label>Self Employed:</label>
+        <select name="Self_Employed" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+
+        <label>Applicant Income:</label>
+        <input type="number" name="ApplicantIncome" min="0" required>
+
+        <label>Coapplicant Income:</label>
+        <input type="number" name="CoapplicantIncome" min="0" required>
+
+        <label>Loan Amount:</label>
+        <input type="number" name="LoanAmount" min="0" required>
+
+        <label>Loan Amount Term (days):</label>
+        <input type="number" name="Loan_Amount_Term" min="0" required>
+
+        <label>Credit History:</label>
+        <select name="Credit_History" required>
+            <option value="1.0">Good (1)</option>
+            <option value="0.0">Bad (0)</option>
+        </select>
+
+        <label>Property Area:</label>
+        <select name="Property_Area" required>
+            <option value="Urban">Urban</option>
+            <option value="Semiurban">Semiurban</option>
+            <option value="Rural">Rural</option>
+        </select>
+
+        <input type="submit" class="btn" value="Check Approval">
+    </form>
+</div>
+</body>
+</html>
